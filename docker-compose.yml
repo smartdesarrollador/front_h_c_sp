@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────
+# Development docker-compose
+# Service: vite (React dev server con HMR)
+# ─────────────────────────────────────────────────────────────
+
+services:
+  vite:
+    build:
+      context: .
+      target: dev
+    container_name: rbac_hub_client_vite
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules   # preserva node_modules del contenedor
+    env_file:
+      - .env
+    environment:
+      API_TARGET: http://rbac_django:8000   # usado por vite.config.ts para el proxy
+    ports:
+      - "5175:5175"
+    networks:
+      - default
+      - global
+
+volumes:
+  node_modules:
+
+networks:
+  global:
+    external: true
