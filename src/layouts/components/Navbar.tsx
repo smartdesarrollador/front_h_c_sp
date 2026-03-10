@@ -3,7 +3,6 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Building2,
-  Bell,
   Sun,
   Moon,
   LogOut,
@@ -12,6 +11,7 @@ import {
   X,
   User,
 } from 'lucide-react'
+import BellBadge from '@/features/notifications/components/BellBadge'
 import { useAuthStore } from '@/store/authStore'
 import { useUiStore } from '@/store/uiStore'
 import { useAuthContext } from '@/features/auth/AuthContext'
@@ -134,13 +134,13 @@ function Navbar() {
             )}
           </button>
 
-          {/* Bell icon — navigates to /notifications (PASO 11 will connect unread count) */}
+          {/* Bell icon — navigates to /notifications */}
           <button
             onClick={() => navigate('/notifications')}
             aria-label="Notifications"
             className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <BellBadge />
           </button>
 
           {/* User menu */}

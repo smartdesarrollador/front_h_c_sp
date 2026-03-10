@@ -14,6 +14,9 @@ vi.mock('@/store/uiStore')
 vi.mock('@/features/auth/AuthContext')
 vi.mock('@/hooks/usePermissions')
 vi.mock('@/hooks/useFeatureGate')
+vi.mock('@/features/notifications/hooks/useHubNotifications', () => ({
+  useHubNotifications: () => ({ notifications: [], unreadCount: 0, isLoading: false }),
+}))
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
   return {
