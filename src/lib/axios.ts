@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store/authStore'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api/v1'
+const BASE_URL = `${import.meta.env.VITE_API_URL ?? ''}/api/v1`
 
 /**
  * Cliente público (sin token). Para login, register, refresh, etc.
@@ -43,7 +43,7 @@ apiClient.interceptors.response.use(
           const { data } = await publicClient.post<{
             access_token: string
             refresh_token: string
-          }>('/auth/token/refresh/', { refresh_token: refreshToken })
+          }>('/auth/refresh-token', { refresh_token: refreshToken })
 
           useAuthStore.getState().setAccessToken(data.access_token)
           localStorage.setItem('hub-refreshToken', data.refresh_token)

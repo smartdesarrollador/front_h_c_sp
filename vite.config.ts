@@ -28,6 +28,11 @@ export default defineConfig({
       '/api': {
         target: process.env.API_TARGET || 'http://localhost:8000',
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.setHeader('Host', 'localhost')
+          })
+        },
       },
     },
   },

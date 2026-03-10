@@ -11,7 +11,7 @@ export function useResetPassword() {
   const navigate = useNavigate()
   return useMutation({
     mutationFn: ({ token, password }: ResetPasswordRequest) =>
-      publicClient.post('/auth/reset-password/', { token, password }),
+      publicClient.post('/auth/reset-password', { token, password }),
     onSuccess: () => navigate('/login', { state: { resetSuccess: true } }),
   })
 }

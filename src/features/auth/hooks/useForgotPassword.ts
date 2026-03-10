@@ -4,6 +4,6 @@ import { publicClient } from '@/lib/axios'
 export function useForgotPassword() {
   return useMutation({
     mutationFn: (email: string) =>
-      publicClient.post('/auth/forgot-password/', { email }),
+      publicClient.post('/auth/forgot-password', { email }),
   })
 }

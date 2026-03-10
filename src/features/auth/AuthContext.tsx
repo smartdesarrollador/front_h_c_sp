@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (refresh) {
       publicClient
         .post<{ access_token: string; refresh_token: string }>(
-          '/auth/token/refresh/',
+          '/auth/refresh-token',
           { refresh_token: refresh },
         )
         .then(({ data }) => {
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data } = await publicClient.post<
       | { access_token: string; refresh_token: string; user: User; tenant: Tenant }
       | { mfa_required: true; mfa_token: string }
-    >('/auth/login/', { email, password })
+    >('/auth/login', { email, password })
 
     if ('mfa_required' in data) {
       return { mfaRequired: true, mfaToken: data.mfa_token }
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function logout(): Promise<void> {
-    await apiClient.post('/auth/logout/').catch(() => {})
+    await apiClient.post('/auth/logout').catch(() => {})
     useAuthStore.getState().clearAuth()
     localStorage.removeItem('hub-refreshToken')
     localStorage.removeItem('hub-authUser')
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function register(data: RegisterRequest): Promise<void> {
-    await publicClient.post('/auth/register/', {
+    await publicClient.post('/auth/register', {
       name: data.name,
       email: data.email,
       password: data.password,
