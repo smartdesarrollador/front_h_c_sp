@@ -6,8 +6,8 @@ export function useCurrentSubscription() {
   const { data, isLoading } = useQuery<CurrentSubscription>({
     queryKey: ['hub-subscription'],
     queryFn: async () => {
-      const res = await apiClient.get<CurrentSubscription>('/admin/subscriptions/current/')
-      return res.data
+      const res = await apiClient.get<{ subscription: CurrentSubscription }>('/admin/subscriptions/current')
+      return res.data.subscription
     },
     staleTime: 60_000,
   })
