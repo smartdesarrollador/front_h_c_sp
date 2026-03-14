@@ -5,9 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import AuthLayout from '@/features/auth/components/AuthLayout'
 import { useLogin } from '@/features/auth/hooks/useLogin'
-import { publicClient } from '@/lib/axios'
+import { publicClient, apiClient } from '@/lib/axios'
 import { useAuthStore } from '@/store/authStore'
 import type { User, Tenant } from '@/types/auth'
+import type { SSOTokenResponse } from '@/features/services/types'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -16,10 +17,18 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
+async function redirectViaSSO(service: string) {
+  const { data } = await apiClient.post<SSOTokenResponse>('/auth/sso/token/', { service })
+  window.location.href = data.redirect_url
+}
+
 export default function LoginPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const resetSuccess = (location.state as { resetSuccess?: boolean } | null)?.resetSuccess
+
+  const searchParams = new URLSearchParams(location.search)
+  const nextService = searchParams.get('next') // 'workspace' | 'vista' | null
 
   const { mutate: loginMutate, isPending, error, data: loginResult } = useLogin()
   const [mfaToken, setMfaToken] = useState<string | null>(null)
@@ -33,12 +42,15 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) })
 
-  // Detectar resultado MFA desde la mutación
+  // Detectar resultado MFA desde la mutación; si hay ?next, iniciar SSO tras login exitoso
   useEffect(() => {
-    if (loginResult && 'mfaRequired' in loginResult) {
+    if (!loginResult) return
+    if ('mfaRequired' in loginResult) {
       setMfaToken(loginResult.mfaToken)
+    } else if (nextService) {
+      redirectViaSSO(nextService)
     }
-  }, [loginResult])
+  }, [loginResult]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleMfaSubmit(e: FormEvent) {
     e.preventDefault()
@@ -58,7 +70,11 @@ export default function LoginPage() {
       localStorage.setItem('hub-refreshToken', data.refresh_token)
       localStorage.setItem('hub-authUser', JSON.stringify(data.user))
       localStorage.setItem('hub-authTenant', JSON.stringify(data.tenant))
-      navigate('/dashboard')
+      if (nextService) {
+        await redirectViaSSO(nextService)
+      } else {
+        navigate('/dashboard')
+      }
     } catch {
       setMfaError('Código MFA inválido. Inténtalo de nuevo.')
     } finally {
