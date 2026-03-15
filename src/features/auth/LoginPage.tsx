@@ -53,6 +53,7 @@ export default function LoginPage() {
   const [mfaError, setMfaError] = useState<string | null>(null)
   const [mfaLoading, setMfaLoading] = useState(false)
   const [desktopRedirecting, setDesktopRedirecting] = useState(false)
+  const [desktopDeepLinkUrl, setDesktopDeepLinkUrl] = useState<string | null>(null)
 
   const {
     register,
@@ -66,8 +67,11 @@ export default function LoginPage() {
     if ('mfaRequired' in loginResult) {
       setMfaToken(loginResult.mfaToken)
     } else if (desktopSource && desktopState) {
+      const url = buildDesktopRedirectUrl(desktopState)
+      setDesktopDeepLinkUrl(url)
       setDesktopRedirecting(true)
-      window.location.href = buildDesktopRedirectUrl(desktopState)
+      // Attempt auto-open; may be blocked by browser — button below as fallback
+      window.location.href = url
     } else if (nextService) {
       redirectViaSSO(nextService)
     }
@@ -93,8 +97,10 @@ export default function LoginPage() {
       localStorage.setItem('hub-authTenant', JSON.stringify(data.tenant))
 
       if (desktopSource && desktopState) {
+        const url = buildDesktopRedirectUrl(desktopState)
+        setDesktopDeepLinkUrl(url)
         setDesktopRedirecting(true)
-        window.location.href = buildDesktopRedirectUrl(desktopState)
+        window.location.href = url
       } else if (nextService) {
         await redirectViaSSO(nextService)
       } else {
@@ -124,8 +130,19 @@ export default function LoginPage() {
           <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
             Sesión iniciada en tu app de escritorio
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Puedes cerrar esta pestaña y volver al sidebar.
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+            Si el sidebar no se actualizó automáticamente, haz clic en el botón:
+          </p>
+          {desktopDeepLinkUrl && (
+            <a
+              href={desktopDeepLinkUrl}
+              className="inline-block bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors text-sm"
+            >
+              Abrir en el sidebar
+            </a>
+          )}
+          <p className="text-gray-400 dark:text-gray-500 text-xs mt-4">
+            Puedes cerrar esta pestaña una vez que el sidebar muestre tu perfil.
           </p>
         </div>
       </AuthLayout>
