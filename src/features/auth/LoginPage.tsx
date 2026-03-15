@@ -22,6 +22,19 @@ async function redirectViaSSO(service: string) {
   window.location.href = data.redirect_url
 }
 
+function buildDesktopRedirectUrl(state: string): string {
+  const store = useAuthStore.getState()
+  const payload = btoa(
+    JSON.stringify({
+      access_token: store.accessToken,
+      refresh_token: localStorage.getItem('hub-refreshToken'),
+      user: store.user,
+      tenant: store.tenant,
+    }),
+  )
+  return `rbacdesktop://auth?payload=${encodeURIComponent(payload)}&state=${state}`
+}
+
 export default function LoginPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -29,12 +42,15 @@ export default function LoginPage() {
 
   const searchParams = new URLSearchParams(location.search)
   const nextService = searchParams.get('next') // 'workspace' | 'vista' | null
+  const desktopSource = searchParams.get('source') === 'desktop'
+  const desktopState = searchParams.get('state') ?? ''
 
   const { mutate: loginMutate, isPending, error, data: loginResult } = useLogin()
   const [mfaToken, setMfaToken] = useState<string | null>(null)
   const [mfaCode, setMfaCode] = useState('')
   const [mfaError, setMfaError] = useState<string | null>(null)
   const [mfaLoading, setMfaLoading] = useState(false)
+  const [desktopRedirecting, setDesktopRedirecting] = useState(false)
 
   const {
     register,
@@ -42,11 +58,14 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) })
 
-  // Detectar resultado MFA desde la mutación; si hay ?next, iniciar SSO tras login exitoso
+  // After successful login: redirect to desktop, SSO service, or dashboard
   useEffect(() => {
     if (!loginResult) return
     if ('mfaRequired' in loginResult) {
       setMfaToken(loginResult.mfaToken)
+    } else if (desktopSource && desktopState) {
+      setDesktopRedirecting(true)
+      window.location.href = buildDesktopRedirectUrl(desktopState)
     } else if (nextService) {
       redirectViaSSO(nextService)
     }
@@ -70,7 +89,11 @@ export default function LoginPage() {
       localStorage.setItem('hub-refreshToken', data.refresh_token)
       localStorage.setItem('hub-authUser', JSON.stringify(data.user))
       localStorage.setItem('hub-authTenant', JSON.stringify(data.tenant))
-      if (nextService) {
+
+      if (desktopSource && desktopState) {
+        setDesktopRedirecting(true)
+        window.location.href = buildDesktopRedirectUrl(desktopState)
+      } else if (nextService) {
         await redirectViaSSO(nextService)
       } else {
         navigate('/dashboard')
@@ -90,12 +113,34 @@ export default function LoginPage() {
     ? 'Credenciales inválidas. Verifica tu email y contraseña.'
     : null
 
+  // Desktop redirect confirmation screen
+  if (desktopRedirecting) {
+    return (
+      <AuthLayout>
+        <div className="text-center py-8">
+          <div className="text-4xl mb-4">✅</div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+            Sesión iniciada en tu app de escritorio
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
+            Puedes cerrar esta pestaña y volver al sidebar.
+          </p>
+        </div>
+      </AuthLayout>
+    )
+  }
+
   if (mfaToken) {
     return (
       <AuthLayout>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           Verificación MFA
         </h1>
+        {desktopSource && (
+          <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+            Autenticando desde tu app de escritorio
+          </p>
+        )}
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           Ingresa el código de tu aplicación autenticadora.
         </p>
@@ -133,17 +178,25 @@ export default function LoginPage() {
           Contraseña restablecida correctamente. Inicia sesión con tu nueva contraseña.
         </div>
       )}
+      {desktopSource && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4 text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
+          <span>🖥️</span>
+          <span>Iniciando sesión desde tu app de escritorio</span>
+        </div>
+      )}
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
         Iniciar sesión
       </h1>
       <p className="text-gray-600 dark:text-gray-400 mb-6">Accede a tu Hub de Servicios</p>
 
-      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-lg p-3 mb-6 text-sm">
-        <p className="font-medium text-blue-800 dark:text-blue-300">Demo</p>
-        <p className="text-blue-600 dark:text-blue-400">
-          Usa tus credenciales de tenant para acceder
-        </p>
-      </div>
+      {!desktopSource && (
+        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-lg p-3 mb-6 text-sm">
+          <p className="font-medium text-blue-800 dark:text-blue-300">Demo</p>
+          <p className="text-blue-600 dark:text-blue-400">
+            Usa tus credenciales de tenant para acceder
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
