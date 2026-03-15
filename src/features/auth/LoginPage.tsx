@@ -45,7 +45,9 @@ export default function LoginPage() {
   const desktopSource = searchParams.get('source') === 'desktop'
   const desktopState = searchParams.get('state') ?? ''
 
-  const { mutate: loginMutate, isPending, error, data: loginResult } = useLogin()
+  const { mutate: loginMutate, isPending, error, data: loginResult } = useLogin({
+    skipNavigate: desktopSource,
+  })
   const [mfaToken, setMfaToken] = useState<string | null>(null)
   const [mfaCode, setMfaCode] = useState('')
   const [mfaError, setMfaError] = useState<string | null>(null)
