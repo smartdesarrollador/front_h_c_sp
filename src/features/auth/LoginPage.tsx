@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import AuthLayout from '@/features/auth/components/AuthLayout'
+import GoogleOAuthButton from '@/features/auth/components/GoogleOAuthButton'
 import { useLogin } from '@/features/auth/hooks/useLogin'
 import { publicClient, apiClient } from '@/lib/axios'
 import { useAuthStore } from '@/store/authStore'
@@ -259,6 +260,22 @@ export default function LoginPage() {
           {isPending ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </button>
       </form>
+
+      {!desktopSource && (
+        <>
+          <div className="relative mt-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">o</span>
+            </div>
+          </div>
+          <div className="mt-4">
+            <GoogleOAuthButton />
+          </div>
+        </>
+      )}
 
       <div className="mt-4 text-center space-y-2 text-sm">
         <Link

@@ -88,6 +88,11 @@ describe('LoginPage', () => {
     expect(screen.getByText(/credenciales inválidas/i)).toBeInTheDocument()
   })
 
+  it('renderiza botón Google OAuth cuando no es flujo desktop', () => {
+    render(<LoginPage />, { wrapper })
+    expect(screen.getByRole('button', { name: /continuar con google/i })).toBeInTheDocument()
+  })
+
   it('muestra banner de éxito cuando location.state.resetSuccess=true', () => {
     const qc = new QueryClient({
       defaultOptions: { queries: { retry: false } },

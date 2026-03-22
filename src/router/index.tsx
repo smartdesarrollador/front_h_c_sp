@@ -21,6 +21,11 @@ export const router = createBrowserRouter([
       { path: 'register', element: <RegisterPage /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },
+      {
+        path: 'auth/google/callback',
+        lazy: () =>
+          import('@/features/auth/GoogleCallbackPage').then((m) => ({ Component: m.default })),
+      },
 
       // Protected app routes
       {
