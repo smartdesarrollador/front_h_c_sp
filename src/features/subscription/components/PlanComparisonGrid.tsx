@@ -1,6 +1,6 @@
 import { Check, X } from 'lucide-react'
 import type { BillingCycle, PlanData, PlanType } from '../types'
-import { PLANS, isUpgrade } from '../plans-data'
+import { isUpgrade } from '../plans-data'
 import BillingCycleToggle from './BillingCycleToggle'
 
 interface PlanCardProps {
@@ -77,6 +77,7 @@ function PlanCard({ plan, currentPlan, billingCycle, onSelect, canUpgrade }: Pla
 }
 
 interface Props {
+  plans: PlanData[]
   currentPlan: PlanType
   billingCycle: BillingCycle
   onBillingCycleChange: (cycle: BillingCycle) => void
@@ -85,6 +86,7 @@ interface Props {
 }
 
 export default function PlanComparisonGrid({
+  plans,
   currentPlan,
   billingCycle,
   onBillingCycleChange,
@@ -98,7 +100,7 @@ export default function PlanComparisonGrid({
         <BillingCycleToggle value={billingCycle} onChange={onBillingCycleChange} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {PLANS.map((plan) => (
+        {plans.map((plan) => (
           <PlanCard
             key={plan.id}
             plan={plan}

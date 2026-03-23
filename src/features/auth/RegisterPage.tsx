@@ -7,6 +7,7 @@ import { Check } from 'lucide-react'
 import AuthLayout from '@/features/auth/components/AuthLayout'
 import GoogleOAuthButton from '@/features/auth/components/GoogleOAuthButton'
 import { useRegister } from '@/features/auth/hooks/useRegister'
+import { usePlans } from '@/features/subscription/hooks/usePlans'
 
 const step1Schema = z
   .object({
@@ -26,28 +27,6 @@ const step2Schema = z.object({
 type Step1Data = z.infer<typeof step1Schema>
 type Step2Data = z.infer<typeof step2Schema>
 
-const PLANS = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '$0/mes',
-    description: 'Para proyectos personales',
-  },
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: '$29/mes',
-    description: 'Para pequeños equipos',
-    popular: true,
-  },
-  {
-    id: 'professional',
-    name: 'Professional',
-    price: '$79/mes',
-    description: 'Para empresas',
-  },
-]
-
 const STEP_LABELS = ['Cuenta', 'Empresa', 'Plan', '¡Listo!']
 
 export default function RegisterPage() {
@@ -64,6 +43,8 @@ export default function RegisterPage() {
     organizationName: '',
   })
   const { mutateAsync: registerMutate, isPending } = useRegister()
+  const { plans: allPlans } = usePlans()
+  const registrationPlans = allPlans.filter((p) => p.id !== 'enterprise')
 
   const form1 = useForm<Step1Data>({ resolver: zodResolver(step1Schema) })
   const form2 = useForm<Step2Data>({ resolver: zodResolver(step2Schema) })
@@ -282,7 +263,7 @@ export default function RegisterPage() {
             Elige tu plan
           </h2>
           <div className="space-y-3">
-            {PLANS.map((plan) => (
+            {registrationPlans.map((plan) => (
               <label
                 key={plan.id}
                 className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
@@ -302,9 +283,9 @@ export default function RegisterPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-gray-900 dark:text-white">
-                      {plan.name}
+                      {plan.displayName}
                     </span>
-                    {'popular' in plan && plan.popular && (
+                    {plan.popular && (
                       <span className="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-medium">
                         Popular
                       </span>
@@ -315,7 +296,7 @@ export default function RegisterPage() {
                   </p>
                 </div>
                 <span className="font-bold text-gray-900 dark:text-white">
-                  {plan.price}
+                  ${plan.priceMonthly}/mes
                 </span>
               </label>
             ))}

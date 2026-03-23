@@ -4,6 +4,7 @@ import type { BillingCycle, PlanType } from './types'
 import { useCurrentSubscription } from './hooks/useCurrentSubscription'
 import { useUpgradeSubscription } from './hooks/useUpgradeSubscription'
 import { useCancelSubscription } from './hooks/useCancelSubscription'
+import { usePlans } from './hooks/usePlans'
 import CurrentPlanCard from './components/CurrentPlanCard'
 import UsageMeters from './components/UsageMeters'
 import PlanComparisonGrid from './components/PlanComparisonGrid'
@@ -17,10 +18,13 @@ export default function SubscriptionPage() {
   const { canManageBilling, canUpgradePlan } = usePermissions()
   const { mutate: upgradePlan, isPending: upgrading } = useUpgradeSubscription()
   const { mutate: cancelPlan, isPending: canceling } = useCancelSubscription()
+  const { plans } = usePlans()
 
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
   const [upgradeTarget, setUpgradeTarget] = useState<PlanType | null>(null)
   const [showCancelModal, setShowCancelModal] = useState(false)
+
+  const targetPlanData = upgradeTarget ? plans.find((p) => p.id === upgradeTarget) ?? null : null
 
   const handleUpgradeConfirm = () => {
     if (!upgradeTarget) return
@@ -71,6 +75,7 @@ export default function SubscriptionPage() {
       {canManageBilling && (
         <div id="plan-comparison">
           <PlanComparisonGrid
+            plans={plans}
             currentPlan={subscription?.plan ?? 'free'}
             billingCycle={billingCycle}
             onBillingCycleChange={setBillingCycle}
@@ -81,7 +86,7 @@ export default function SubscriptionPage() {
       )}
 
       <UpgradePlanModal
-        targetPlan={upgradeTarget}
+        targetPlan={targetPlanData}
         billingCycle={billingCycle}
         isOpen={upgradeTarget !== null}
         onClose={() => setUpgradeTarget(null)}

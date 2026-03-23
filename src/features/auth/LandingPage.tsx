@@ -1,36 +1,7 @@
 import { useNavigate, Navigate } from 'react-router-dom'
 import { Building2, Monitor, Globe, Laptop, Check } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
-
-const PLANS = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: '/mes',
-    description: 'Para proyectos personales y exploración',
-    features: ['1 usuario', '3 proyectos', 'Acceso básico', 'Soporte por email'],
-    popular: false,
-  },
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: '$29',
-    period: '/mes',
-    description: 'Para pequeños equipos y negocios en crecimiento',
-    features: ['5 usuarios', '20 proyectos', 'Todos los servicios', 'Soporte prioritario', 'API access'],
-    popular: true,
-  },
-  {
-    id: 'professional',
-    name: 'Professional',
-    price: '$79',
-    period: '/mes',
-    description: 'Para empresas que necesitan escala y control',
-    features: ['Usuarios ilimitados', 'Proyectos ilimitados', 'Todos los servicios', 'Soporte 24/7', 'API access', 'SSO avanzado'],
-    popular: false,
-  },
-]
+import { usePlans } from '@/features/subscription/hooks/usePlans'
 
 const FEATURES = [
   {
@@ -53,6 +24,8 @@ const FEATURES = [
 export default function LandingPage() {
   const navigate = useNavigate()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const { plans } = usePlans()
+  const landingPlans = plans.filter((p) => p.id !== 'enterprise')
 
   if (isAuthenticated) return <Navigate to="/dashboard" replace />
 
@@ -140,7 +113,7 @@ export default function LandingPage() {
             Comienza gratis y escala cuando lo necesites
           </p>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {PLANS.map((plan) => (
+            {landingPlans.map((plan) => (
               <div
                 key={plan.id}
                 className={`relative rounded-2xl p-8 ${
@@ -161,7 +134,7 @@ export default function LandingPage() {
                     plan.popular ? 'text-white' : 'text-gray-900 dark:text-white'
                   }`}
                 >
-                  {plan.name}
+                  {plan.displayName}
                 </h3>
                 <p
                   className={`text-sm mb-4 ${
@@ -176,15 +149,15 @@ export default function LandingPage() {
                       plan.popular ? 'text-white' : 'text-gray-900 dark:text-white'
                     }`}
                   >
-                    {plan.price}
+                    ${plan.priceMonthly}
                   </span>
                   <span className={`text-sm ${plan.popular ? 'text-primary-100' : 'text-gray-500'}`}>
-                    {plan.period}
+                    /mes
                   </span>
                 </div>
                 <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm">
+                  {plan.features.filter((f) => f.included).map((f) => (
+                    <li key={f.label} className="flex items-center gap-2 text-sm">
                       <Check
                         className={`h-4 w-4 flex-shrink-0 ${
                           plan.popular ? 'text-primary-200' : 'text-primary-600'
@@ -195,7 +168,7 @@ export default function LandingPage() {
                           plan.popular ? 'text-primary-100' : 'text-gray-600 dark:text-gray-300'
                         }
                       >
-                        {feature}
+                        {f.label}
                       </span>
                     </li>
                   ))}
@@ -208,7 +181,7 @@ export default function LandingPage() {
                       : 'bg-primary-600 text-white hover:bg-primary-700'
                   }`}
                 >
-                  {plan.id === 'free' ? 'Comenzar gratis' : `Empezar con ${plan.name}`}
+                  {plan.id === 'free' ? 'Comenzar gratis' : `Empezar con ${plan.displayName}`}
                 </button>
               </div>
             ))}

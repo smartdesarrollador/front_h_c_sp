@@ -1,9 +1,8 @@
 import { Loader2 } from 'lucide-react'
-import type { BillingCycle, PlanType } from '../types'
-import { PLANS } from '../plans-data'
+import type { BillingCycle, PlanData } from '../types'
 
 interface Props {
-  targetPlan: PlanType | null
+  targetPlan: PlanData | null
   billingCycle: BillingCycle
   isOpen: boolean
   onClose: () => void
@@ -21,9 +20,7 @@ export default function UpgradePlanModal({
 }: Props) {
   if (!isOpen || !targetPlan) return null
 
-  const plan = PLANS.find((p) => p.id === targetPlan)
-  if (!plan) return null
-
+  const plan = targetPlan
   const price =
     billingCycle === 'annual' ? Math.round(plan.priceAnnual / 12) : plan.priceMonthly
 
