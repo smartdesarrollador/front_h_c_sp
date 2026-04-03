@@ -25,8 +25,8 @@ apiClient.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`
   }
-  if (tenant?.slug) {
-    config.headers['X-Tenant-Slug'] = tenant.slug
+  if (tenant?.subdomain) {
+    config.headers['X-Tenant-Slug'] = tenant.subdomain
   }
   return config
 })
