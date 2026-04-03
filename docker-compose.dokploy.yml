@@ -1,0 +1,31 @@
+# docker-compose.dokploy.yml — para Dokploy (Traefik, no Nginx Proxy Manager)
+
+services:
+  hub:
+    build:
+      context: .
+      target: prod
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_APP_NAME: ${VITE_APP_NAME:-Hub Client Portal}
+        VITE_REFERRAL_BASE_URL: ${VITE_REFERRAL_BASE_URL:-}
+    restart: unless-stopped
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      # HTTPS router
+      - "traefik.http.routers.rbac-hub.rule=Host(`${HUB_DOMAIN}`)"
+      - "traefik.http.routers.rbac-hub.entrypoints=websecure"
+      - "traefik.http.routers.rbac-hub.service=rbac-hub"
+      # HTTP → HTTPS redirect
+      - "traefik.http.routers.rbac-hub-http.rule=Host(`${HUB_DOMAIN}`)"
+      - "traefik.http.routers.rbac-hub-http.entrypoints=web"
+      - "traefik.http.routers.rbac-hub-http.middlewares=redirect-to-https@file"
+      - "traefik.http.routers.rbac-hub-http.service=rbac-hub"
+      # Backend service
+      - "traefik.http.services.rbac-hub.loadbalancer.server.port=80"
+
+networks:
+  dokploy-network:
+    external: true
