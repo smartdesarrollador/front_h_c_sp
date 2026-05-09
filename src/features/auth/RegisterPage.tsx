@@ -331,10 +331,13 @@ export default function RegisterPage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               ¡Cuenta creada!
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300 mb-2">
               Tu organización <strong>{formData.organizationName}</strong> está lista.
-              Inicia sesión para comenzar.
             </p>
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-700 dark:text-amber-300 text-left">
+              <p className="font-medium mb-1">Revisa tu bandeja de entrada</p>
+              <p>Te enviamos un email a <strong>{formData.email}</strong> con un enlace para verificar tu cuenta. Debes verificarlo antes de iniciar sesión.</p>
+            </div>
           </div>
           <button
             onClick={() => navigate('/login')}

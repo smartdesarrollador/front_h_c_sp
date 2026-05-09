@@ -59,8 +59,11 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) })
+
+  const watchedEmail = watch('email', '')
 
   // After successful login: redirect to desktop, SSO service, or dashboard
   useEffect(() => {
@@ -118,9 +121,13 @@ export default function LoginPage() {
     loginMutate({ email: formData.email, password: formData.password })
   }
 
-  const errorMessage = error
-    ? 'Credenciales inválidas. Verifica tu email y contraseña.'
-    : null
+  const loginError = error as { response?: { data?: { code?: string } } } | null
+  const isEmailNotVerified = loginError?.response?.data?.code === 'email_not_verified'
+
+  const errorMessage =
+    error && !isEmailNotVerified
+      ? 'Credenciales inválidas. Verifica tu email y contraseña.'
+      : null
 
   // Desktop redirect confirmation screen
   if (desktopRedirecting) {
@@ -250,6 +257,17 @@ export default function LoginPage() {
         {errorMessage && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg p-3 text-sm text-red-600 dark:text-red-400">
             {errorMessage}
+          </div>
+        )}
+        {isEmailNotVerified && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-700 dark:text-amber-300 space-y-2">
+            <p>Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.</p>
+            <Link
+              to={`/verify-email?resend=true${watchedEmail ? `&email=${encodeURIComponent(watchedEmail)}` : ''}`}
+              className="font-medium underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-100"
+            >
+              Reenviar email de verificación
+            </Link>
           </div>
         )}
         <button

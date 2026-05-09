@@ -48,4 +48,12 @@ export const authHandlers = [
   http.post(`${API}/auth/logout/`, () => new HttpResponse(null, { status: 204 })),
 
   http.post(`${API}/auth/forgot-password/`, () => HttpResponse.json({ message: 'Email sent' })),
+
+  http.post(`${API}/auth/verify-email/`, () =>
+    HttpResponse.json({ message: 'Email verified successfully.' }),
+  ),
+
+  http.post(`${API}/auth/resend-verification/`, () =>
+    HttpResponse.json({ message: 'If your email is registered and unverified, a new link has been sent.' }),
+  ),
 ]
