@@ -121,8 +121,8 @@ export default function LoginPage() {
     loginMutate({ email: formData.email, password: formData.password })
   }
 
-  const loginError = error as { response?: { data?: { code?: string } } } | null
-  const isEmailNotVerified = loginError?.response?.data?.code === 'email_not_verified'
+  const loginError = error as { response?: { data?: { non_field_errors?: string[] } } } | null
+  const isEmailNotVerified = loginError?.response?.data?.non_field_errors?.[0] === 'email_not_verified'
 
   const errorMessage =
     error && !isEmailNotVerified
