@@ -6,7 +6,7 @@ import en from './locales/en'
 const NAMESPACES = [
   'navbar', 'landing', 'login', 'register', 'dashboard',
   'serviceCard', 'serviceCatalog', 'subscription', 'billing',
-  'notifications', 'team', 'referrals', 'support', 'profile', 'common',
+  'notifications', 'team', 'referrals', 'support', 'profile', 'desktop', 'common',
 ] as const
 
 const buildResources = (locale: Record<string, unknown>): ResourceLanguage =>

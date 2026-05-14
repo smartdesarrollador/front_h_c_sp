@@ -99,6 +99,13 @@ export const router = createBrowserRouter([
                     Component: m.default,
                   })),
               },
+              {
+                path: 'desktop',
+                lazy: () =>
+                  import('@/pages/DesktopDownloadPage').then((m) => ({
+                    Component: m.default,
+                  })),
+              },
             ],
           },
         ],

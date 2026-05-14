@@ -20,6 +20,7 @@ import LanguageSwitcher from './LanguageSwitcher'
 const NAV_LINKS = [
   { to: '/dashboard', labelKey: 'navbar.dashboard' },
   { to: '/services', labelKey: 'navbar.services' },
+  { to: '/desktop', labelKey: 'navbar.desktop' },
   { to: '/subscription', labelKey: 'navbar.subscription' },
   { to: '/team', labelKey: 'navbar.team' },
   { to: '/support', labelKey: 'navbar.support' },
