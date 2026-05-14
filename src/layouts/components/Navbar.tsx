@@ -18,17 +18,17 @@ import { useAuthContext } from '@/features/auth/AuthContext'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const NAV_LINKS = [
-  { to: '/dashboard', labelKey: 'navbar.dashboard' },
-  { to: '/services', labelKey: 'navbar.services' },
-  { to: '/desktop', labelKey: 'navbar.desktop' },
-  { to: '/subscription', labelKey: 'navbar.subscription' },
-  { to: '/team', labelKey: 'navbar.team' },
-  { to: '/support', labelKey: 'navbar.support' },
-  { to: '/profile', labelKey: 'navbar.profile' },
+  { to: '/dashboard', labelKey: 'dashboard' },
+  { to: '/services', labelKey: 'services' },
+  { to: '/desktop', labelKey: 'desktop' },
+  { to: '/subscription', labelKey: 'subscription' },
+  { to: '/team', labelKey: 'team' },
+  { to: '/support', labelKey: 'support' },
+  { to: '/profile', labelKey: 'profile' },
 ]
 
 function Navbar() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['navbar', 'common'])
   const navigate = useNavigate()
   const location = useLocation()
   const { logout } = useAuthContext()
@@ -72,7 +72,7 @@ function Navbar() {
           <button
             onClick={() => setMobileMenuOpen((v) => !v)}
             aria-expanded={mobileMenuOpen}
-            aria-label={t('navbar.openMenu')}
+            aria-label={t('openMenu')}
             className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             {mobileMenuOpen ? (
@@ -85,7 +85,7 @@ function Navbar() {
           {/* Logo */}
           <NavLink
             to="/dashboard"
-            aria-label={t('navbar.goToDashboard')}
+            aria-label={t('goToDashboard')}
             className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg px-1"
           >
             <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -150,7 +150,7 @@ function Navbar() {
               onClick={() => setUserMenuOpen((v) => !v)}
               aria-expanded={userMenuOpen}
               aria-haspopup="true"
-              aria-label={t('navbar.userMenu')}
+              aria-label={t('userMenu')}
               className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <div className="w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
@@ -189,7 +189,7 @@ function Navbar() {
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                    {t('navbar.viewProfile')}
+                    {t('viewProfile')}
                   </NavLink>
 
                   <button
@@ -198,7 +198,7 @@ function Navbar() {
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
-                    {t('navbar.logout')}
+                    {t('logout')}
                   </button>
                 </div>
               </>
@@ -241,7 +241,7 @@ function Navbar() {
                   ) : (
                     <Moon className="w-4 h-4" />
                   )}
-                  {darkMode ? t('common.lightMode') : t('common.darkMode')}
+                  {darkMode ? t('lightMode') : t('darkMode')}
                 </button>
               </div>
 
@@ -259,7 +259,7 @@ function Navbar() {
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                {t('navbar.logout')}
+                {t('logout')}
               </button>
             </div>
           </nav>
