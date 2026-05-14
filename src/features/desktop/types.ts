@@ -1,5 +1,18 @@
 export type ReleasePlatform = 'windows' | 'macos' | 'linux'
 
+export type LicenseStatus = 'active' | 'pending' | 'revoked'
+
+export interface License {
+  id: string
+  license_key: string
+  status: LicenseStatus
+  hardware_id: string | null
+  activated_at: string | null
+  expires_at: string | null
+  is_active: boolean
+  sent_at: string | null
+}
+
 export interface DesktopRelease {
   id: string
   version: string

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { MonitorDown } from 'lucide-react'
 import { useLatestReleases } from './hooks/useLatestReleases'
 import { PlatformDownloadCard } from './components/PlatformDownloadCard'
+import { LicenseKeySection } from './components/LicenseKeySection'
 import type { ReleasePlatform, DesktopRelease } from './types'
 
 const PLATFORMS: ReleasePlatform[] = ['windows', 'macos', 'linux']
@@ -80,6 +81,9 @@ export default function DesktopDownloadPage() {
           ))}
         </ul>
       </div>
+
+      {/* License Key section */}
+      <LicenseKeySection />
     </div>
   )
 }
