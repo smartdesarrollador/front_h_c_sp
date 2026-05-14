@@ -1,4 +1,4 @@
-import { Layout, Globe, Monitor, Box, type LucideIcon } from 'lucide-react'
+import { Layout, Globe, Monitor, Box, ArrowUpRight, type LucideIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { SSOLaunchButton } from './SSOLaunchButton'
 import { ServiceStatusBadge } from './ServiceStatusBadge'
@@ -55,7 +55,18 @@ export function ServiceCard({ service, variant = 'active' }: ServiceCardProps) {
       )}
 
       <div className="mt-auto">
-        {service.status === 'active' && <SSOLaunchButton serviceSlug={service.slug} />}
+        {service.status === 'active' && service.slug === 'desktop' && (
+          <button
+            onClick={() => navigate('/desktop')}
+            className="flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors w-full"
+          >
+            Abrir
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {service.status === 'active' && service.slug !== 'desktop' && (
+          <SSOLaunchButton serviceSlug={service.slug} />
+        )}
         {service.status === 'suspended' && (
           <button
             disabled
