@@ -34,23 +34,25 @@ export default function UsageMeters({ usage, isLoading }: Props) {
     )
   }
 
+  if (!usage) return null
+
   const meters = [
     {
       label: 'Usuarios',
-      current: usage?.users.current ?? 0,
-      limit: usage?.users.limit ?? null,
+      current: usage.users?.current ?? 0,
+      limit: usage.users?.limit ?? null,
       format: (v: number) => `${v}`,
     },
     {
       label: 'Almacenamiento',
-      current: usage?.storage.current_gb ?? 0,
-      limit: usage?.storage.limit_gb ?? null,
+      current: usage.storage?.current_gb ?? 0,
+      limit: usage.storage?.limit_gb ?? null,
       format: (v: number) => `${v.toFixed(1)} GB`,
     },
     {
       label: 'Servicios activos',
-      current: usage?.services.current ?? 0,
-      limit: usage?.services.limit ?? null,
+      current: usage.services?.current ?? 0,
+      limit: usage.services?.limit ?? null,
       format: (v: number) => `${v}`,
     },
   ]
