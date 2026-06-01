@@ -9,6 +9,7 @@ services:
         VITE_API_URL: ${VITE_API_URL}
         VITE_APP_NAME: ${VITE_APP_NAME:-Hub Client Portal}
         VITE_REFERRAL_BASE_URL: ${VITE_REFERRAL_BASE_URL:-}
+        VITE_TENANT_SUBDOMAIN: ${VITE_TENANT_SUBDOMAIN:-}
     restart: unless-stopped
     networks:
       - dokploy-network
