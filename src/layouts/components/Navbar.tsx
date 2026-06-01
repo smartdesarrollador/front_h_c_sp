@@ -88,11 +88,19 @@ function Navbar() {
             aria-label={t('goToDashboard')}
             className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg px-1"
           >
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Building2 className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {tenant?.logo_url ? (
+                <img
+                  src={tenant.logo_url}
+                  alt={tenant.name}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <Building2 className="w-4 h-4 text-white" />
+              )}
             </div>
             <span className="font-bold text-gray-900 dark:text-white text-lg hidden sm:block">
-              Hub
+              {tenant?.name ?? 'Hub'}
             </span>
           </NavLink>
         </div>

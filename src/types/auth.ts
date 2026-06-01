@@ -19,6 +19,8 @@ export interface Tenant {
   subdomain: string
   plan: string
   primaryColor?: string
+  logo_url?: string | null
+  favicon_url?: string | null
 }
 
 export interface LoginRequest {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -15,6 +15,16 @@ import {
 import { useAuthStore } from '@/store/authStore'
 import { useUiStore } from '@/store/uiStore'
 import { usePlans } from '@/features/subscription/hooks/usePlans'
+import { publicClient } from '@/lib/axios'
+
+const SUBDOMAIN = import.meta.env.VITE_TENANT_SUBDOMAIN as string | undefined
+
+interface PublicBranding {
+  name: string | null
+  logo_url: string | null
+  favicon_url: string | null
+  primary_color: string | null
+}
 
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
@@ -27,6 +37,35 @@ export default function LandingPage() {
   const { language, setLanguage } = useUiStore()
   const { plans } = usePlans()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [branding, setBranding] = useState<PublicBranding | null>(null)
+
+  useEffect(() => {
+    // Priority: env var → localStorage (previous session) → skip
+    let subdomain = SUBDOMAIN
+    if (!subdomain) {
+      try {
+        const stored = localStorage.getItem('authTenant')
+        if (stored) subdomain = JSON.parse(stored)?.subdomain
+      } catch {}
+    }
+    if (!subdomain) return
+
+    publicClient
+      .get<PublicBranding>(`/public/branding/?subdomain=${subdomain}`)
+      .then(({ data }) => {
+        setBranding(data)
+        if (data.favicon_url) {
+          let link = document.querySelector<HTMLLinkElement>("link[rel='icon']")
+          if (!link) {
+            link = document.createElement('link')
+            link.rel = 'icon'
+            document.head.appendChild(link)
+          }
+          link.href = data.favicon_url
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const landingPlans = plans.filter((p) => p.id !== 'enterprise')
 
@@ -57,12 +96,22 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0B0F1A]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="bg-primary-600 text-white p-1.5 rounded-lg">
-              <Building2 className="h-5 w-5" />
+          {branding?.logo_url ? (
+            <img
+              src={branding.logo_url}
+              alt={branding.name ?? 'Logo'}
+              className="h-9 w-auto max-w-[180px] object-contain"
+            />
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <div className="bg-primary-600 text-white p-1.5 rounded-lg">
+                <Building2 className="h-5 w-5" />
+              </div>
+              <span className="text-lg font-bold text-white">
+                {branding?.name ?? 'Hub de Servicios'}
+              </span>
             </div>
-            <span className="text-lg font-bold text-white">Hub de Servicios</span>
-          </div>
+          )}
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-8">
@@ -198,6 +247,13 @@ export default function LandingPage() {
           <div className="inline-flex items-center border border-primary-600/50 bg-primary-600/10 text-primary-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-8 tracking-wide">
             {t('badge')}
           </div>
+
+          {/* Org name in hero (shown when branding is loaded) */}
+          {branding?.name && (
+            <p className="text-2xl sm:text-3xl font-bold text-white/90 mb-4 tracking-tight">
+              {branding.name}
+            </p>
+          )}
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-6xl font-extrabold text-white mb-5 leading-tight tracking-tight">
