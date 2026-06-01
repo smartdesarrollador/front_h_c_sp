@@ -44,7 +44,7 @@ export default function LandingPage() {
     let subdomain = SUBDOMAIN
     if (!subdomain) {
       try {
-        const stored = localStorage.getItem('authTenant')
+        const stored = localStorage.getItem('hub-authTenant')
         if (stored) subdomain = JSON.parse(stored)?.subdomain
       } catch {}
     }
