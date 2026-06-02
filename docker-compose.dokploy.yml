@@ -26,6 +26,13 @@ services:
       - "traefik.http.routers.rbac-hub-http.service=rbac-hub"
       # Backend service
       - "traefik.http.services.rbac-hub.loadbalancer.server.port=80"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          memory: 16M
 
 networks:
   dokploy-network:
