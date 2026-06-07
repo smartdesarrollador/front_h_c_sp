@@ -17,6 +17,15 @@ export const router = createBrowserRouter([
       // Public landing at root
       { index: true, element: <LandingPage /> },
 
+      // Public marketing pages
+      {
+        path: 'paginas-web',
+        lazy: () =>
+          import('@/features/paginas-web/PaginasWebPage').then((m) => ({
+            Component: m.default,
+          })),
+      },
+
       // Auth routes (public)
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },

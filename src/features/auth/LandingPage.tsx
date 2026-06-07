@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Building2,
@@ -9,22 +8,10 @@ import {
   Check,
   ShieldCheck,
   Zap,
-  Menu,
-  X,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
-import { useUiStore } from '@/store/uiStore'
 import { usePlans } from '@/features/subscription/hooks/usePlans'
-import { publicClient } from '@/lib/axios'
-
-const SUBDOMAIN = import.meta.env.VITE_TENANT_SUBDOMAIN as string | undefined
-
-interface PublicBranding {
-  name: string | null
-  logo_url: string | null
-  favicon_url: string | null
-  primary_color: string | null
-}
+import LandingNavbar from './components/LandingNavbar'
 
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
@@ -34,42 +21,16 @@ export default function LandingPage() {
   const navigate = useNavigate()
   const { t } = useTranslation('landing')
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const { language, setLanguage } = useUiStore()
   const { plans } = usePlans()
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [branding, setBranding] = useState<PublicBranding | null>(null)
-
-  useEffect(() => {
-    // Priority: env var → localStorage (previous session) → skip
-    let subdomain = SUBDOMAIN
-    if (!subdomain) {
-      try {
-        const stored = localStorage.getItem('hub-authTenant')
-        if (stored) subdomain = JSON.parse(stored)?.subdomain
-      } catch {}
-    }
-    if (!subdomain) return
-
-    publicClient
-      .get<PublicBranding>(`/public/branding/?subdomain=${subdomain}`)
-      .then(({ data }) => {
-        setBranding(data)
-        if (data.favicon_url) {
-          let link = document.querySelector<HTMLLinkElement>("link[rel='icon']")
-          if (!link) {
-            link = document.createElement('link')
-            link.rel = 'icon'
-            document.head.appendChild(link)
-          }
-          link.href = data.favicon_url
-        }
-      })
-      .catch(() => {})
-  }, [])
 
   const landingPlans = plans.filter((p) => p.id !== 'enterprise')
 
   if (isAuthenticated) return <Navigate to="/dashboard" replace />
+
+  const navLinks = [
+    { label: t('navFeatures'), onClick: () => scrollTo('features') },
+    { label: t('navPricing'),  onClick: () => scrollTo('pricing')  },
+  ]
 
   const stats = [
     { value: t('stat1Value'), label: t('stat1Label') },
@@ -91,142 +52,19 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#0B0F1A] text-[#F8FAFC]">
+    <div className="min-h-screen bg-[#EAF1F8] dark:bg-[#071D2E] text-[#0B2740] dark:text-[#EAF1F8]">
       {/* ── NAVBAR ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0B0F1A]/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Logo */}
-          {branding?.logo_url ? (
-            <img
-              src={branding.logo_url}
-              alt={branding.name ?? 'Logo'}
-              className="h-9 w-auto max-w-[180px] object-contain"
-            />
-          ) : (
-            <div className="flex items-center gap-2.5">
-              <div className="bg-primary-600 text-white p-1.5 rounded-lg">
-                <Building2 className="h-5 w-5" />
-              </div>
-              <span className="text-lg font-bold text-white">
-                {branding?.name ?? 'Hub de Servicios'}
-              </span>
-            </div>
-          )}
-
-          {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-8">
-            <button
-              onClick={() => scrollTo('features')}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              {t('navFeatures')}
-            </button>
-            <button
-              onClick={() => scrollTo('pricing')}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              {t('navPricing')}
-            </button>
-          </div>
-
-          {/* Right side: language toggle + login */}
-          <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center bg-white/10 rounded-full p-0.5 text-xs font-semibold">
-              <button
-                onClick={() => setLanguage('es')}
-                className={`px-3 py-1 rounded-full transition-colors ${
-                  language === 'es'
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                ES
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-3 py-1 rounded-full transition-colors ${
-                  language === 'en'
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                EN
-              </button>
-            </div>
-            <button
-              onClick={() => navigate('/login')}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            >
-              {t('ctaLogin')}
-            </button>
-          </div>
-
-          {/* Mobile hamburger */}
-          <button
-            aria-label="Abrir menú"
-            className="md:hidden text-gray-400 hover:text-white transition-colors"
-            onClick={() => setMobileOpen((v) => !v)}
-          >
-            {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="md:hidden bg-[#111827] border-t border-white/10 px-4 py-5 flex flex-col gap-4">
-            <button
-              onClick={() => { scrollTo('features'); setMobileOpen(false) }}
-              className="text-gray-300 text-sm text-left hover:text-white"
-            >
-              {t('navFeatures')}
-            </button>
-            <button
-              onClick={() => { scrollTo('pricing'); setMobileOpen(false) }}
-              className="text-gray-300 text-sm text-left hover:text-white"
-            >
-              {t('navPricing')}
-            </button>
-            <div className="flex items-center gap-2 pt-1">
-              <button
-                onClick={() => setLanguage('es')}
-                className={`text-xs px-3 py-1 rounded-full border font-semibold transition-colors ${
-                  language === 'es'
-                    ? 'bg-primary-600 border-primary-600 text-white'
-                    : 'border-white/20 text-gray-400 hover:text-white'
-                }`}
-              >
-                ES
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`text-xs px-3 py-1 rounded-full border font-semibold transition-colors ${
-                  language === 'en'
-                    ? 'bg-primary-600 border-primary-600 text-white'
-                    : 'border-white/20 text-gray-400 hover:text-white'
-                }`}
-              >
-                EN
-              </button>
-            </div>
-            <button
-              onClick={() => navigate('/login')}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium w-full text-center transition-colors"
-            >
-              {t('ctaLogin')}
-            </button>
-          </div>
-        )}
-      </nav>
+      <LandingNavbar navLinks={navLinks} />
 
       {/* ── HERO ── */}
       <section className="relative pt-36 pb-28 px-4 overflow-hidden">
-        {/* Violet radial glow */}
+        {/* Blue radial glow */}
         <div
           aria-hidden="true"
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse 85% 55% at 50% -5%, rgba(124,58,237,0.28), transparent)',
+              'radial-gradient(ellipse 85% 55% at 50% -5%, rgba(28,128,242,0.18), transparent)',
           }}
         />
         {/* Dot-grid texture */}
@@ -235,7 +73,7 @@ export default function LandingPage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              'radial-gradient(rgba(167,139,250,0.25) 1px, transparent 1px)',
+              'radial-gradient(rgba(28,128,242,0.12) 1px, transparent 1px)',
             backgroundSize: '28px 28px',
             maskImage:
               'radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%)',
@@ -244,25 +82,20 @@ export default function LandingPage() {
 
         <div className="relative max-w-4xl mx-auto text-center">
           {/* Badge */}
-          <div className="inline-flex items-center border border-primary-600/50 bg-primary-600/10 text-primary-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-8 tracking-wide">
+          <div className="inline-flex items-center border border-primary-600/30 bg-primary-600/10 text-primary-700 dark:text-primary-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-8 tracking-wide">
             {t('badge')}
           </div>
 
-          {/* Org name in hero (shown when branding is loaded) */}
-          {branding?.name && (
-            <p className="text-2xl sm:text-3xl font-bold text-white/90 mb-4 tracking-tight">
-              {branding.name}
-            </p>
-          )}
-
           {/* Headline */}
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-white mb-5 leading-tight tracking-tight">
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-[#0B2740] dark:text-[#EAF1F8] mb-5 leading-tight tracking-tight">
             {t('heroTitle')}{' '}
-            <span className="text-primary-400">{t('heroHighlight')}</span>
+            <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+              {t('heroHighlight')}
+            </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-[rgba(11,39,64,0.66)] dark:text-[rgba(234,241,248,0.72)] mb-10 max-w-2xl mx-auto leading-relaxed">
             {t('heroSubtitle')}
           </p>
 
@@ -276,7 +109,7 @@ export default function LandingPage() {
             </button>
             <button
               onClick={() => scrollTo('features')}
-              className="w-full sm:w-auto border border-white/20 hover:border-primary-400/50 text-gray-300 hover:text-white px-8 py-3 rounded-xl text-base font-semibold transition-all hover:-translate-y-0.5"
+              className="w-full sm:w-auto border border-[rgba(11,39,64,0.17)] dark:border-[rgba(234,241,248,0.18)] hover:border-primary-600 text-[rgba(11,39,64,0.66)] dark:text-[rgba(234,241,248,0.72)] hover:text-primary-600 dark:hover:text-primary-400 px-8 py-3 rounded-xl text-base font-semibold transition-all hover:-translate-y-0.5"
             >
               {t('ctaDemo')}
             </button>
@@ -286,8 +119,10 @@ export default function LandingPage() {
           <div className="mt-20 grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-2xl mx-auto">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-                <div className="text-xs text-gray-500 mt-1.5 uppercase tracking-wider">
+                <div className="text-2xl sm:text-3xl font-bold text-[#0B2740] dark:text-[#EAF1F8]">
+                  {stat.value}
+                </div>
+                <div className="text-xs text-[rgba(11,39,64,0.45)] dark:text-[rgba(234,241,248,0.50)] mt-1.5 uppercase tracking-wider">
                   {stat.label}
                 </div>
               </div>
@@ -297,13 +132,15 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="py-24 px-4 bg-[#111827]">
+      <section id="features" className="py-24 px-4 bg-white dark:bg-[#0F2D45]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0B2740] dark:text-[#EAF1F8] mb-4">
               {t('featuresTitle')}
             </h2>
-            <p className="text-gray-400 max-w-xl mx-auto">{t('featuresSub')}</p>
+            <p className="text-[rgba(11,39,64,0.66)] dark:text-[rgba(234,241,248,0.72)] max-w-xl mx-auto">
+              {t('featuresSub')}
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -312,13 +149,13 @@ export default function LandingPage() {
               return (
                 <div
                   key={f.title}
-                  className="group bg-[#0B0F1A] border border-white/10 rounded-2xl p-8 hover:border-primary-600/40 transition-all hover:-translate-y-1"
+                  className="group bg-[#EAF1F8] dark:bg-[#071D2E] border border-[rgba(11,39,64,0.10)] dark:border-[rgba(234,241,248,0.10)] rounded-2xl p-8 hover:border-primary-600/40 transition-all hover:-translate-y-1"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary-600/15 flex items-center justify-center mb-6 group-hover:bg-primary-600/25 transition-colors">
-                    <Icon className="h-6 w-6 text-primary-400" />
+                  <div className="w-12 h-12 rounded-xl bg-primary-600/10 dark:bg-primary-600/15 flex items-center justify-center mb-6 group-hover:bg-primary-600/20 transition-colors">
+                    <Icon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{f.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+                  <h3 className="text-xl font-semibold text-[#0B2740] dark:text-[#EAF1F8] mb-3">{f.title}</h3>
+                  <p className="text-[rgba(11,39,64,0.66)] dark:text-[rgba(234,241,248,0.72)] text-sm leading-relaxed">{f.desc}</p>
                 </div>
               )
             })}
@@ -326,14 +163,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── WHY US ── */}
-      <section className="py-24 px-4 bg-[#0B0F1A]">
+      {/* ── WHY US (on-dark) ── */}
+      <section className="py-24 px-4 bg-[#0B2740] dark:bg-[#071D2E]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#EAF1F8] mb-4">
               {t('whyTitle')}
             </h2>
-            <p className="text-gray-400">{t('whySub')}</p>
+            <p className="text-[rgba(234,241,248,0.72)]">{t('whySub')}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-10">
@@ -341,12 +178,12 @@ export default function LandingPage() {
               const Icon = w.icon
               return (
                 <div key={w.title} className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary-600/15 flex items-center justify-center mt-0.5">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary-600/20 flex items-center justify-center mt-0.5">
                     <Icon className="h-5 w-5 text-primary-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">{w.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">{w.desc}</p>
+                    <h3 className="text-lg font-semibold text-[#EAF1F8] mb-2">{w.title}</h3>
+                    <p className="text-[rgba(234,241,248,0.72)] text-sm leading-relaxed">{w.desc}</p>
                   </div>
                 </div>
               )
@@ -356,13 +193,15 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ── */}
-      <section id="pricing" className="py-24 px-4 bg-[#111827]">
+      <section id="pricing" className="py-24 px-4 bg-[#DDE5EE] dark:bg-[#0F2D45]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0B2740] dark:text-[#EAF1F8] mb-4">
               {t('pricingTitle')}
             </h2>
-            <p className="text-gray-400">{t('pricingSub')}</p>
+            <p className="text-[rgba(11,39,64,0.66)] dark:text-[rgba(234,241,248,0.72)]">
+              {t('pricingSub')}
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -372,7 +211,7 @@ export default function LandingPage() {
                 className={`relative rounded-2xl p-8 flex flex-col ${
                   plan.popular
                     ? 'bg-gradient-to-br from-primary-600 to-primary-800 shadow-2xl shadow-primary-600/30 ring-1 ring-primary-500/50'
-                    : 'bg-[#0B0F1A] border border-white/10 hover:border-primary-600/30 transition-colors'
+                    : 'bg-white dark:bg-[#071D2E] border border-[rgba(11,39,64,0.10)] dark:border-[rgba(234,241,248,0.10)] hover:border-primary-600/40 transition-colors'
                 }`}
               >
                 {plan.popular && (
@@ -384,14 +223,18 @@ export default function LandingPage() {
                 )}
 
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-1">{plan.displayName}</h3>
-                  <p className={`text-sm mb-6 ${plan.popular ? 'text-primary-200' : 'text-gray-500'}`}>
+                  <h3 className={`text-xl font-bold mb-1 ${plan.popular ? 'text-white' : 'text-[#0B2740] dark:text-[#EAF1F8]'}`}>
+                    {plan.displayName}
+                  </h3>
+                  <p className={`text-sm mb-6 ${plan.popular ? 'text-primary-200' : 'text-[rgba(11,39,64,0.66)] dark:text-[rgba(234,241,248,0.72)]'}`}>
                     {plan.description}
                   </p>
 
                   <div className="mb-8">
-                    <span className="text-4xl font-bold text-white">${plan.priceMonthly}</span>
-                    <span className={`text-sm ml-1 ${plan.popular ? 'text-primary-200' : 'text-gray-500'}`}>
+                    <span className={`text-4xl font-bold ${plan.popular ? 'text-white' : 'text-[#0B2740] dark:text-[#EAF1F8]'}`}>
+                      ${plan.priceMonthly}
+                    </span>
+                    <span className={`text-sm ml-1 ${plan.popular ? 'text-primary-200' : 'text-[rgba(11,39,64,0.45)] dark:text-[rgba(234,241,248,0.50)]'}`}>
                       {t('perMonth')}
                     </span>
                   </div>
@@ -403,10 +246,10 @@ export default function LandingPage() {
                         <li key={f.label} className="flex items-center gap-2.5 text-sm">
                           <Check
                             className={`h-4 w-4 flex-shrink-0 ${
-                              plan.popular ? 'text-primary-200' : 'text-primary-400'
+                              plan.popular ? 'text-primary-200' : 'text-primary-600 dark:text-primary-400'
                             }`}
                           />
-                          <span className={plan.popular ? 'text-primary-100' : 'text-gray-300'}>
+                          <span className={plan.popular ? 'text-primary-100' : 'text-[rgba(11,39,64,0.66)] dark:text-[rgba(234,241,248,0.72)]'}>
                             {f.label}
                           </span>
                         </li>
@@ -434,16 +277,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="py-10 px-4 border-t border-white/10 bg-[#0B0F1A]">
+      {/* ── FOOTER (on-dark) ── */}
+      <footer className="py-10 px-4 border-t border-[rgba(234,241,248,0.12)] bg-[#0B2740] dark:bg-[#071D2E]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="bg-primary-600 text-white p-1 rounded-md">
               <Building2 className="h-4 w-4" />
             </div>
-            <span className="text-sm font-semibold text-white">Hub de Servicios</span>
+            <span className="text-sm font-semibold text-[#EAF1F8]">Hub de Servicios</span>
           </div>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-[rgba(234,241,248,0.50)]">
             © {new Date().getFullYear()} Hub de Servicios. {t('footerRights')}
           </p>
         </div>
